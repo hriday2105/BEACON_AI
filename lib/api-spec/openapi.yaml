@@ -1,22 +1,26 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: BeaconAI cybersecurity API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: scan
+    description: Security scanning operations
+  - name: map
+    description: Community map and reports
+  - name: stats
+    description: Dashboard statistics
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +28,162 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [stats]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /scan/scam:
+    post:
+      operationId: analyzeScam
+      tags: [scan]
+      summary: Analyze text for scam indicators
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScamInput"
+      responses:
+        "200":
+          description: Scam analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScamResult"
+
+  /scan/phishing:
+    post:
+      operationId: analyzePhishing
+      tags: [scan]
+      summary: Analyze URL for phishing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhishingInput"
+      responses:
+        "200":
+          description: Phishing analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhishingResult"
+
+  /scan/payment:
+    post:
+      operationId: analyzePayment
+      tags: [scan]
+      summary: Analyze payment screenshot for fraud
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentInput"
+      responses:
+        "200":
+          description: Payment fraud analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResult"
+
+  /scan/deepfake:
+    post:
+      operationId: analyzeDeepfake
+      tags: [scan]
+      summary: Analyze image or video for deepfake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeepfakeInput"
+      responses:
+        "200":
+          description: Deepfake analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeepfakeResult"
+
+  /scan/news:
+    post:
+      operationId: analyzeNews
+      tags: [scan]
+      summary: Fact-check a news claim or article
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsInput"
+      responses:
+        "200":
+          description: Fact-check result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsResult"
+
+  /map/reports:
+    get:
+      operationId: getReports
+      tags: [map]
+      summary: Get community scam reports
+      responses:
+        "200":
+          description: List of reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
+    post:
+      operationId: submitReport
+      tags: [map]
+      summary: Submit a community scam report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportInput"
+      responses:
+        "201":
+          description: Report submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+
+  /map/hotspots:
+    get:
+      operationId: getHotspots
+      tags: [map]
+      summary: Get top scam hotspots by city
+      responses:
+        "200":
+          description: Hotspot list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Hotspot"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +191,241 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    DashboardStats:
+      type: object
+      properties:
+        totalScans:
+          type: integer
+        threatsBlocked:
+          type: integer
+        accuracyRate:
+          type: number
+        communityReports:
+          type: integer
+      required: [totalScans, threatsBlocked, accuracyRate, communityReports]
+
+    ScamInput:
+      type: object
+      properties:
+        message:
+          type: string
+        platform:
+          type: string
+      required: [message, platform]
+
+    ScamResult:
+      type: object
+      properties:
+        verdict:
+          type: string
+          enum: [safe, suspicious, dangerous]
+        confidence:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [safe, suspicious, dangerous]
+        summary:
+          type: string
+        category:
+          type: ["string", "null"]
+        indicators:
+          type: array
+          items:
+            $ref: "#/components/schemas/Indicator"
+        recommendations:
+          type: array
+          items:
+            type: string
+      required: [verdict, confidence, riskLevel, summary, category, indicators, recommendations]
+
+    Indicator:
+      type: object
+      properties:
+        label:
+          type: string
+        confidence:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [safe, suspicious, dangerous]
+      required: [label, confidence, riskLevel]
+
+    PhishingInput:
+      type: object
+      properties:
+        url:
+          type: string
+      required: [url]
+
+    PhishingResult:
+      type: object
+      properties:
+        verdict:
+          type: string
+          enum: [safe, suspicious, dangerous]
+        confidence:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [safe, suspicious, dangerous]
+        summary:
+          type: string
+        domain:
+          type: string
+        indicators:
+          type: array
+          items:
+            $ref: "#/components/schemas/Indicator"
+        recommendations:
+          type: array
+          items:
+            type: string
+      required: [verdict, confidence, riskLevel, summary, domain, indicators, recommendations]
+
+    PaymentInput:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+        platform:
+          type: string
+      required: [imageBase64, platform]
+
+    PaymentResult:
+      type: object
+      properties:
+        verdict:
+          type: string
+          enum: [authentic, suspicious, fraudulent]
+        confidence:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [safe, suspicious, dangerous]
+        summary:
+          type: string
+        category:
+          type: ["string", "null"]
+        indicators:
+          type: array
+          items:
+            $ref: "#/components/schemas/Indicator"
+        recommendations:
+          type: array
+          items:
+            type: string
+      required: [verdict, confidence, riskLevel, summary, category, indicators, recommendations]
+
+    DeepfakeInput:
+      type: object
+      properties:
+        mediaBase64:
+          type: string
+        mediaType:
+          type: string
+          enum: [image, video]
+      required: [mediaBase64, mediaType]
+
+    DeepfakeResult:
+      type: object
+      properties:
+        verdict:
+          type: string
+          enum: [authentic, likely_manipulated, deepfake]
+        confidence:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [safe, suspicious, dangerous]
+        summary:
+          type: string
+        indicators:
+          type: array
+          items:
+            $ref: "#/components/schemas/Indicator"
+        recommendations:
+          type: array
+          items:
+            type: string
+      required: [verdict, confidence, riskLevel, summary, indicators, recommendations]
+
+    NewsInput:
+      type: object
+      properties:
+        claim:
+          type: string
+        sourceUrl:
+          type: ["string", "null"]
+      required: [claim]
+
+    NewsResult:
+      type: object
+      properties:
+        verdict:
+          type: string
+          enum: [true, likely_true, unverified, likely_false, false]
+        confidence:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [safe, suspicious, dangerous]
+        summary:
+          type: string
+        category:
+          type: ["string", "null"]
+        indicators:
+          type: array
+          items:
+            $ref: "#/components/schemas/Indicator"
+        recommendations:
+          type: array
+          items:
+            type: string
+      required: [verdict, confidence, riskLevel, summary, category, indicators, recommendations]
+
+    Report:
+      type: object
+      properties:
+        id:
+          type: integer
+        scamType:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        description:
+          type: string
+        upvotes:
+          type: integer
+        createdAt:
+          type: string
+      required: [id, scamType, city, state, description, upvotes, createdAt]
+
+    ReportInput:
+      type: object
+      properties:
+        scamType:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        description:
+          type: string
+      required: [scamType, city, state, description]
+
+    Hotspot:
+      type: object
+      properties:
+        city:
+          type: string
+        state:
+          type: string
+        count:
+          type: integer
+        topScamType:
+          type: string
+      required: [city, state, count, topScamType]

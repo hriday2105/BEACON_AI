@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "BeaconAI"
+version = "1.0.0"
+id = "artifacts/beacon-ai"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20283
+
+[services.development]
+run = "pnpm --filter @workspace/beacon-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/beacon-ai", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/beacon-ai/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20283"
+BASE_PATH = "/"
